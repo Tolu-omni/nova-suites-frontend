@@ -1,26 +1,511 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-nova-espresso: #26180F;
+  --color-nova-espresso-soft: #342218;
+  --color-nova-ivory: #F6F0E6;
+  --color-nova-ivory-soft: #FFFDF8;
+  --color-nova-gold: #B8873A;
+  --color-nova-gold-light: #CFA75F;
+  --color-nova-sand: #D8C4A6;
+  --color-nova-taupe: #A58C74;
+  --color-nova-brown-muted: #6F5A49;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Wire the next/font-loaded families (see app/layout.tsx) into our tokens. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: var(--font-playfair), Georgia, Cambria, "Times New Roman", serif;
+
+  --nova-espresso: #26180F;
+  --nova-espresso-soft: #342218;
+  --nova-ivory: #F6F0E6;
+  --nova-ivory-soft: #FFFDF8;
+  --nova-gold: #B8873A;
+  --nova-gold-light: #CFA75F;
+  --nova-sand: #D8C4A6;
+  --nova-taupe: #A58C74;
+  --nova-brown-muted: #6F5A49;
+  --nova-text-dark: #211812;
+  --nova-text-muted: #77695F;
+  --nova-text-light: #F8F3EA;
+  --nova-border-light: #E5D8C7;
+  --nova-border-dark: rgba(255,255,255,0.12);
+  --nova-dashboard-sidebar: #26180F;
+  --nova-dashboard-bg: #F6F0E6;
+  --nova-dashboard-surface: #FFFDF8;
+
+  /* Admin panel (redesigned Dashboard + Bookings) — neutral, reference-matched. */
+  --ui-bg: #F7F7F8;
+  --ui-surface: #FFFFFF;
+  --ui-surface-2: #FAFAFA;
+  --ui-border: #E4E4E7;
+  --ui-border-strong: #D4D4D8;
+  --ui-text: #18181B;
+  --ui-text-muted: #71717A;
+  --ui-text-soft: #A1A1AA;
+  --ui-accent: #16A34A;
+  --ui-accent-soft: #DCFCE7;
+  --ui-accent-text: #15803D;
+  --ui-danger: #EF4444;
+  --ui-danger-soft: #FEE2E2;
+  --ui-warn: #F59E0B;
+  --ui-warn-soft: #FEF3C7;
+  --ui-info: #3B82F6;
+  --ui-info-soft: #DBEAFE;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  width: 100%;
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  background: var(--nova-ivory);
+  color: var(--nova-text-dark);
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
+
+::selection {
+  background: rgba(184, 135, 58, 0.28);
+  color: var(--nova-text-dark);
+}
+
+.font-serif { font-family: var(--font-serif); }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.nova-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--nova-gold);
+}
+
+.nova-display {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 8vw, 6.75rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.nova-page-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5vw, 4.75rem);
+  line-height: 1;
+}
+
+.nova-section-heading {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3.4vw, 3.45rem);
+  line-height: 1.03;
+}
+
+.nova-card-heading {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.nova-body {
+  color: var(--nova-text-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.nova-caption {
+  color: var(--nova-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.nova-form-label {
+  color: var(--nova-text-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.text-gold-gradient {
+  color: var(--nova-gold);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.nova-section {
+  background: var(--nova-ivory);
+  color: var(--nova-text-dark);
+}
+
+.nova-section-soft {
+  background: var(--nova-ivory-soft);
+  color: var(--nova-text-dark);
+}
+
+.nova-section-dark {
+  background: var(--nova-espresso);
+  color: var(--nova-text-light);
+}
+
+.nova-card {
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid var(--nova-border-light);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(38, 24, 15, 0.08);
+}
+
+.nova-card-dark {
+  background: var(--nova-espresso-soft);
+  border: 1px solid var(--nova-border-dark);
+  border-radius: 12px;
+  color: var(--nova-text-light);
+}
+
+.nova-divider {
+  width: 3rem;
+  height: 1px;
+  background: var(--nova-gold);
+}
+
+.glass-card {
+  background: rgba(255, 253, 248, 0.9);
+  border: 1px solid var(--nova-border-light);
+  box-shadow: 0 18px 50px rgba(38, 24, 15, 0.08);
+}
+
+/* ─── Admin dashboard ──────────────────────────────────────────────────────── */
+
+.admin-card {
+  background: #fff;
+  border: 1px solid var(--nova-border-light);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(38, 24, 15, 0.06);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table thead th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--nova-brown-muted);
+  background: var(--nova-ivory-soft);
+  border-bottom: 1px solid var(--nova-border-light);
+}
+
+.admin-table tbody td {
+  padding: 0.9rem 1rem;
+  vertical-align: middle;
+  color: var(--nova-text-dark);
+  border-bottom: 1px solid var(--nova-border-light);
+}
+
+.admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(184, 135, 58, 0.06);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--nova-text-dark);
+  background: #fff;
+  border: 1px solid var(--nova-border-light);
+  border-radius: 10px;
+  transition: border-color 0.15s ease;
+}
+
+.admin-input::placeholder {
+  color: var(--nova-taupe);
+}
+
+.admin-input:focus {
+  border-color: var(--nova-gold);
+}
+
+/* ─── Panel (redesigned Dashboard + Bookings) ──────────────────────────────── */
+
+.panel-card {
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+}
+
+.panel-heading { color: var(--ui-text); }
+.panel-muted { color: var(--ui-text-muted); }
+
+.panel-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.875rem;
+  color: var(--ui-text);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border);
+  border-radius: 10px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.panel-input::placeholder { color: var(--ui-text-soft); }
+.panel-input:focus {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+  outline: none;
+}
+
+/* Search fields carry a leading icon. Tailwind's pl-* loses to the unlayered
+   padding above, so re-assert a comfortable left padding here. */
+.admin-input.pl-10,
+.panel-input.pl-10 {
+  padding-left: 2.75rem;
+}
+
+/* Resolve inherited text against the theme-scoped tokens. Without this,
+   descendants inherit the colour computed on <body>, which always uses the
+   light-theme value (so dark-mode admin text would stay dark). */
+.admin-shell { color: var(--nova-text-dark); }
+
+.panel-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.panel-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--ui-text-muted);
+  border-bottom: 1px solid var(--ui-border);
+}
+.panel-table tbody td {
+  padding: 0.85rem 1rem;
+  vertical-align: middle;
+  color: var(--ui-text);
+  border-bottom: 1px solid var(--ui-border);
+}
+.panel-table tbody tr { transition: background 0.15s ease; }
+.panel-table tbody tr:hover { background: var(--ui-surface-2); }
+.panel-table tbody tr:last-child td { border-bottom: none; }
+
+/* Dark mode — scoped to the admin shell so the public site is never affected. */
+html.dark .admin-shell {
+  --nova-ivory: #09090B;
+  --nova-ivory-soft: #18181B;
+  --nova-text-dark: #FAFAFA;
+  --nova-text-muted: #A1A1AA;
+  --nova-text-light: #FAFAFA;
+  --nova-border-light: #27272A;
+  --nova-border-dark: rgba(255, 255, 255, 0.12);
+  --nova-dashboard-bg: #09090B;
+  --nova-dashboard-surface: #18181B;
+  --nova-espresso: #0F0F11;
+  --nova-espresso-soft: #1C1C20;
+  --nova-taupe: #71717A;
+  --nova-brown-muted: #A1A1AA;
+
+  --ui-bg: #09090B;
+  --ui-surface: #18181B;
+  --ui-surface-2: #1F1F23;
+  --ui-border: #27272A;
+  --ui-border-strong: #3F3F46;
+  --ui-text: #FAFAFA;
+  --ui-text-muted: #A1A1AA;
+  --ui-text-soft: #71717A;
+  --ui-accent: #22C55E;
+  --ui-accent-soft: #14351F;
+  --ui-accent-text: #4ADE80;
+  --ui-danger: #F87171;
+  --ui-danger-soft: #3B1414;
+  --ui-warn: #FBBF24;
+  --ui-warn-soft: #3A2A08;
+  --ui-info: #60A5FA;
+  --ui-info-soft: #12243F;
+}
+
+html.dark .admin-shell .admin-card {
+  background: var(--ui-surface);
+  border-color: var(--ui-border);
+  box-shadow: none;
+}
+html.dark .admin-shell .admin-table thead th {
+  background: var(--ui-surface-2);
+  color: var(--ui-text-muted);
+  border-color: var(--ui-border);
+}
+html.dark .admin-shell .admin-table tbody td {
+  color: var(--ui-text);
+  border-color: var(--ui-border);
+}
+html.dark .admin-shell .admin-table tbody tr:hover {
+  background: var(--ui-surface-2);
+}
+html.dark .admin-shell .admin-input {
+  background: var(--ui-surface-2);
+  color: var(--ui-text);
+  border-color: var(--ui-border);
+}
+
+.section-padding { padding: 5rem 0; }
+
+@media (min-width: 1024px) {
+  .section-padding { padding: 7rem 0; }
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--nova-ivory); }
+::-webkit-scrollbar-thumb { background: var(--nova-taupe); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--nova-gold); }
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(184, 135, 58, 0.22);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.55s ease-out both; }
+.animate-fade-in { animation: fadeIn 0.45s ease-out both; }
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+.skeleton {
+  background: linear-gradient(90deg, #eee3d5 25%, #f8f1e8 50%, #eee3d5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── Launch splash ────────────────────────────────────────────────────────── */
+
+/* The attribute is set by a beforeInteractive script before paint, so a
+   first-time visitor sees the brand immediately with no flash of the app. */
+.nova-splash {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  place-items: center;
+  background: var(--nova-espresso);
+  color: var(--nova-text-light);
+  opacity: 1;
+  transition: opacity 480ms ease;
+}
+
+html[data-nova-splash] .nova-splash { display: grid; }
+
+.nova-splash.is-leaving { opacity: 0; pointer-events: none; }
+
+.nova-splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  padding: 32px;
+  text-align: center;
+  animation: novaSplashMark 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.nova-splash-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--nova-sand);
+}
+
+.nova-splash-track {
+  position: relative;
+  display: block;
+  width: 180px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.nova-splash-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 42%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--nova-gold), var(--nova-gold-light));
+  animation: novaSplashBar 1250ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.nova-splash-foot {
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--nova-taupe);
+}
+
+@keyframes novaSplashMark {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes novaSplashBar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* Network-independent type fallbacks (next/font overrides these when it loads). */
+:root { --font-inter: Arial, Helvetica, sans-serif; --font-playfair: Georgia, 'Times New Roman', serif; }

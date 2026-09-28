@@ -1,0 +1,23 @@
+﻿<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="novaGold" x1="172" y1="97" x2="873" y2="938" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F1D883"/>
+      <stop offset="0.2" stop-color="#C7983F"/>
+      <stop offset="0.48" stop-color="#A66D20"/>
+      <stop offset="0.76" stop-color="#D1A85B"/>
+      <stop offset="1" stop-color="#8B5B1E"/>
+    </linearGradient>
+    <linearGradient id="novaHighlight" x1="250" y1="131" x2="716" y2="846" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF2A6" stop-opacity="0.65"/>
+      <stop offset="0.45" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.16"/>
+    </linearGradient>
+    <filter id="softShadow" x="38" y="76" width="948" height="890" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#130B05" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#softShadow)">
+    <path d="M86 919V580C86 506 127 438 193 404L265 367C281 288 332 218 403 178L512 116L621 178C693 219 743 289 759 367L831 404C897 438 938 506 938 580V919H773V575L694 535V919H604V426C604 398 584 374 557 369C527 364 497 364 467 369C440 374 420 398 420 426V919H330V535L251 575V919H86ZM154 851H183V533L330 459V400L222 456C180 478 154 521 154 568V851ZM398 304C474 281 550 281 626 304C607 276 582 252 552 235L512 212L472 235C442 252 417 276 398 304ZM399 851H448V437C490 428 534 428 576 437V851H625V423C625 393 645 366 674 356C650 340 623 328 594 320C540 305 484 305 430 320C401 328 374 340 350 356C379 366 399 393 399 423V851ZM694 459L841 533V851H870V568C870 521 844 478 802 456L694 400V459ZM251 851H282V642L251 657V851ZM742 851H773V657L742 642V851Z" fill="url(#novaGold)"/>
+    <path d="M512 116L621 178C693 219 743 289 759 367L831 404C897 438 938 506 938 580V919H870V568C870 521 844 478 802 456L694 400V459L841 533V851H773V575L694 535V919H625V423C625 393 645 366 674 356C650 340 623 328 594 320C540 305 484 305 430 320C401 328 374 340 350 356C379 366 399 393 399 423V919H330V535L251 575V919H183V533L330 459V400L222 456C180 478 154 521 154 568V919H86V580C86 506 127 438 193 404L265 367C281 288 332 218 403 178L512 116Z" fill="url(#novaHighlight)" opacity="0.55"/>
+  </g>
+</svg>

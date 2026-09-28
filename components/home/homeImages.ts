@@ -1,0 +1,15 @@
+export const hotelImages = {
+  hero: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=2200&q=90',
+  lobby: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1400&q=90',
+  pool: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1000&q=88',
+  gym: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1000&q=88',
+  spa: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1000&q=88',
+  dining: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1400&q=90',
+  roomService: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1000&q=88',
+  business: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=1000&q=88',
+  exterior: 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1400&q=90',
+  galleryRoom: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1000&q=88',
+  gallerySuite: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1000&q=88',
+  galleryLounge: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1000&q=88',
+  galleryCity: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1000&q=88',
+};

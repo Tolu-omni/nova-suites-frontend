@@ -1,4 +1,4 @@
-import { getToken } from './auth';
+import { clearSession, getToken } from './auth';
 import type {
   AuthResponse,
   Booking,
@@ -13,11 +13,17 @@ import type {
   PaystackVerifyResponse,
   RegisterRequest,
   Room,
+  UpdateBookingRequest,
+  UpdateCustomerRequest,
 } from '@/types';
 
 // ─── Base Config ──────────────────────────────────────────────────────────────
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, '') ?? '';
+
+export function getApiBaseUrl(): string {
+  return API_URL;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -30,27 +36,34 @@ export class ApiError extends Error {
   }
 }
 
-// ─── Core Fetch Wrapper ───────────────────────────────────────────────────────
-
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  if (!API_URL) {
+    throw new ApiError(0, 'The Nova Suites API is not configured. Please contact support.');
+  }
+
   const token = getToken();
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers ?? {}),
   };
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch {
+    throw new ApiError(0, 'Unable to reach Nova Suites. Check your connection and try again.');
+  }
 
   // No content responses (204 etc.)
-  if (res.status === 204 || res.headers.get('content-length') === '0') {
+  if (res.ok && (res.status === 204 || res.headers.get('content-length') === '0')) {
     return undefined as unknown as T;
   }
 
@@ -62,8 +75,12 @@ async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    const errorBody = body as { message?: string; errors?: Record<string, string> } | null;
-    const message = errorBody?.message ?? httpStatusMessage(res.status);
+    if (res.status === 401 && token && typeof window !== 'undefined') {
+      clearSession();
+      window.dispatchEvent(new Event('nova-auth-invalidated'));
+    }
+    const errorBody = body as { message?: string; error?: string; errors?: Record<string, string> } | null;
+    const message = errorBody?.message ?? errorBody?.error ?? httpStatusMessage(res.status);
     throw new ApiError(res.status, message, errorBody?.errors);
   }
 
@@ -91,43 +108,56 @@ export const authApi = {
       body: JSON.stringify(data),
     }),
 
+  googleLogin: (credential: string) =>
+    apiFetch<AuthResponse>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    }),
+
   register: (data: RegisterRequest) =>
     apiFetch<AuthResponse>('/api/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-};
 
+};
 // ─── Rooms API ────────────────────────────────────────────────────────────────
 
+function toBackendRoomPayload(data: Partial<CreateRoomRequest>) {
+  return {
+    name:          data.name,
+    roomNumber:    data.roomNumber,
+    roomType:      data.roomType ?? data.type,
+    description:   data.description,
+    pricePerNight: data.pricePerNight,
+    maxGuests:     data.maxGuests,
+    amenities:     data.amenities,
+    imageUrl:      data.imageUrl,
+    floorNumber:   data.floorNumber,
+    size:          data.size,
+    status:        data.status,
+  };
+}
 export const roomsApi = {
-  getAll: () =>
-    apiFetch<Room[]>('/api/rooms'),
-
-  getById: (id: number) =>
-    apiFetch<Room>(`/api/rooms/${id}`),
-
-  getAvailable: (checkInDate: string, checkOutDate: string) =>
-    apiFetch<Room[]>(
-      `/api/rooms/available?checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`
-    ),
+  getAll: () => apiFetch<Room[]>('/api/rooms'),
+  getById: (id: number) => apiFetch<Room>(`/api/rooms/${id}`),
+  getAvailable: (checkInDate: string, checkOutDate: string) => apiFetch<Room[]>(`/api/rooms/available?${new URLSearchParams({checkInDate, checkOutDate})}`),
 
   create: (data: CreateRoomRequest) =>
     apiFetch<Room>('/api/rooms', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(toBackendRoomPayload({ ...data, status: data.status ?? 'AVAILABLE' })),
     }),
 
   update: (id: number, data: Partial<CreateRoomRequest>) =>
     apiFetch<Room>(`/api/rooms/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(toBackendRoomPayload(data)),
     }),
 
   delete: (id: number) =>
     apiFetch<void>(`/api/rooms/${id}`, { method: 'DELETE' }),
 };
-
 // ─── Bookings API ─────────────────────────────────────────────────────────────
 
 export const bookingsApi = {
@@ -137,11 +167,20 @@ export const bookingsApi = {
       body: JSON.stringify(data),
     }),
 
+  getMine: () =>
+    apiFetch<Booking[]>('/api/bookings/my'),
+
   getAll: () =>
     apiFetch<Booking[]>('/api/bookings'),
 
   getById: (id: number) =>
     apiFetch<Booking>(`/api/bookings/${id}`),
+
+  update: (id: number, data: UpdateBookingRequest) =>
+    apiFetch<Booking>(`/api/bookings/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 
   confirm: (id: number) =>
     apiFetch<Booking>(`/api/bookings/${id}/confirm`, { method: 'PATCH' }),
@@ -197,12 +236,66 @@ export const paymentsApi = {
 };
 
 // ─── Customers API ────────────────────────────────────────────────────────────
-// TODO: Confirm exact endpoint paths with backend (/api/customers vs /api/users)
-
 export const customersApi = {
   getAll: () =>
     apiFetch<Customer[]>('/api/customers'),
 
   getById: (id: number) =>
     apiFetch<Customer>(`/api/customers/${id}`),
+
+  update: (id: number, data: UpdateCustomerRequest) =>
+    apiFetch<Customer>(`/api/customers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+};
+
+
+
+
+
+
+
+
+
+export type InquiryStatus = 'NEW' | 'HANDLED';
+export type InquiryType = 'CALL' | 'FORM';
+export interface Inquiry {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status?: InquiryStatus;
+  type?: InquiryType;
+  createdAt: string;
+}
+export interface CallRequest {
+  name: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+export const contactApi = {
+  send: (data: Omit<Inquiry, 'id' | 'createdAt' | 'status' | 'type'>) =>
+    apiFetch<Inquiry>('/api/contact', { method: 'POST', body: JSON.stringify(data) }),
+  list: () => apiFetch<Inquiry[]>('/api/contact'),
+  logCall: (data: CallRequest) =>
+    apiFetch<Inquiry>('/api/contact/call', { method: 'POST', body: JSON.stringify(data) }),
+  markHandled: (id: number) =>
+    apiFetch<Inquiry>(`/api/contact/${id}/handled`, { method: 'PATCH' }),
+};
+
+export interface StaffPolicy {
+  canAnswerCalls: boolean;
+  canViewGuests: boolean;
+  canCheckIn: boolean;
+  canEditBookings: boolean;
+  canTakePayments: boolean;
+}
+export const staffApi = {
+  getPolicy: () => apiFetch<StaffPolicy>('/api/admin/staff-permissions'),
+  updatePolicy: (data: StaffPolicy) =>
+    apiFetch<StaffPolicy>('/api/admin/staff-permissions', { method: 'PUT', body: JSON.stringify(data) }),
 };

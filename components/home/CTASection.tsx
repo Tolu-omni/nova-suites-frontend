@@ -1,0 +1,3 @@
+import Link from 'next/link';
+import {ArrowRight} from 'lucide-react';
+export default function CTASection(){return <section className="bg-[var(--nova-espresso)] px-6 py-20 text-[var(--nova-text-light)] md:px-12 lg:px-16"><div className="flex flex-wrap items-center justify-between gap-8"><div><p className="nova-eyebrow">YOUR NEXT CHAPTER</p><h2 className="mt-5 font-serif text-4xl sm:text-5xl">A little time, beautifully spent.</h2><p className="mt-5 text-[var(--nova-sand)]">Find your room, choose your dates, and make yourself at home.</p></div><Link href="/rooms" className="inline-flex min-h-12 items-center gap-4 border border-[var(--nova-gold)] px-8 py-4">Find your stay <ArrowRight size={18}/></Link></div></section>}

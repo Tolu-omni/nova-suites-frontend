@@ -9,12 +9,10 @@ export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem(TOKEN_KEY);
 }
-
 export function setToken(token: string): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(TOKEN_KEY, token);
 }
-
 export function removeToken(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(TOKEN_KEY);
@@ -58,8 +56,16 @@ export function isAuthenticated(): boolean {
 export function decodeJwt(token: string): Record<string, unknown> | null {
   try {
     const [, payload] = token.split('.');
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
-    return JSON.parse(decoded) as Record<string, unknown>;
+    if (!payload) return null;
+    // JWT payloads are base64url and often unpadded; atob requires padding.
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const binary = atob(padded);
+    // atob yields a binary string; re-decode as UTF-8 so non-ASCII claims survive.
+    const json = decodeURIComponent(
+      Array.from(binary, char => '%' + char.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+    );
+    return JSON.parse(json) as Record<string, unknown>;
   } catch {
     return null;
   }

@@ -7,13 +7,12 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
   role: UserRole;
 }
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  user?: User;
   // Some Spring Boot JWT responses include these fields directly
   id?: number;
   firstName?: string;
@@ -32,13 +31,12 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
-  phone?: string;
 }
 
 // ─── Room Types ───────────────────────────────────────────────────────────────
 
-export type RoomType = 'STANDARD' | 'DELUXE' | 'SUITE' | 'PENTHOUSE' | 'VILLA';
-export type RoomStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED';
+export type RoomType = 'SINGLE' | 'DOUBLE' | 'DELUXE' | 'SUITE';
+export type RoomStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE';
 
 export interface Room {
   id: number;
@@ -56,16 +54,18 @@ export interface Room {
 }
 
 export interface CreateRoomRequest {
-  name: string;
+  name?: string;
   roomNumber: string;
-  type: RoomType;
+  roomType?: RoomType;
+  type?: RoomType;
   description: string;
   pricePerNight: number;
-  maxGuests: number;
+  maxGuests?: number;
   amenities?: string[];
   imageUrl?: string;
   floorNumber?: number;
   size?: number;
+  status?: RoomStatus;
 }
 
 // ─── Booking Types ────────────────────────────────────────────────────────────
@@ -89,6 +89,7 @@ export interface Booking {
   specialRequests?: string;
   createdAt?: string;
   updatedAt?: string;
+  holdExpiresAt?: string;
 }
 
 export interface CreateBookingRequest {
@@ -99,25 +100,34 @@ export interface CreateBookingRequest {
   specialRequests?: string;
 }
 
+export interface UpdateBookingRequest {
+  roomId?: number;
+  checkInDate?: string;
+  checkOutDate?: string;
+  guestCount?: number;
+  status?: BookingStatus;
+  specialRequests?: string;
+}
+
 // ─── Payment Types ────────────────────────────────────────────────────────────
 
-export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
-export type PaymentMethod = 'PAYSTACK' | 'CASH' | 'TRANSFER';
+export type PaymentStatus = 'PENDING' | 'SUCCESSFUL' | 'FAILED' | 'REFUNDED';
+export type PaymentMethod = 'CARD' | 'BANK_TRANSFER' | 'CASH';
 
 export interface Payment {
   id: number;
   booking: Booking;
   amount: number;
   status: PaymentStatus;
-  method?: PaymentMethod;
-  reference?: string;
+  paymentMethod?: PaymentMethod;
+  transactionReference?: string;
   paidAt?: string;
   createdAt?: string;
 }
 
 export interface CreatePaymentRequest {
   bookingId: number;
-  method?: PaymentMethod;
+  paymentMethod?: PaymentMethod;
 }
 
 export interface PaystackInitResponse {
@@ -130,7 +140,7 @@ export interface PaystackInitResponse {
   };
   // Some backends return these at the top level
   authorization_url?: string;
-  reference?: string;
+  transactionReference?: string;
 }
 
 export interface PaystackVerifyResponse {
@@ -148,14 +158,11 @@ export interface PaystackVerifyResponse {
 // ─── Customer Types ───────────────────────────────────────────────────────────
 
 export interface Customer {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  role: UserRole;
-  createdAt?: string;
-  bookingsCount?: number;
+  id: number; firstName: string; lastName: string; email: string;
+  phoneNumber?: string; address?: string;
+}
+export interface UpdateCustomerRequest {
+  firstName?: string; lastName?: string; phoneNumber?: string; address?: string;
 }
 
 // ─── API Response Wrappers ────────────────────────────────────────────────────

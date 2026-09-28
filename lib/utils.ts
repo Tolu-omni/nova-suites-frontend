@@ -2,9 +2,19 @@ import type { BookingStatus, PaymentStatus, RoomType } from '@/types';
 
 // ─── Date & Time ──────────────────────────────────────────────────────────────
 
+// Parses a naive "YYYY-MM-DD" as a local date (new Date() would treat it as UTC
+// midnight, which can shift the calendar day in non-UTC timezones).
+function parseDateInput(dateStr: string): Date {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (dateOnly) {
+    return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
+  }
+  return new Date(dateStr);
+}
+
 export function formatDate(dateStr: string | undefined | null): string {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return parseDateInput(dateStr).toLocaleDateString('en-US', {
     year:  'numeric',
     month: 'long',
     day:   'numeric',
@@ -23,22 +33,25 @@ export function formatDateTime(dateStr: string | undefined | null): string {
 }
 
 export function toISODate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const year  = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day   = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function today(): string {
-  return toISODate(new Date());
+  return new Intl.DateTimeFormat('en-CA', {timeZone:'Africa/Lagos',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 }
 
 export function addDays(dateStr: string, days: number): string {
-  const d = new Date(dateStr);
+  const d = parseDateInput(dateStr);
   d.setDate(d.getDate() + days);
   return toISODate(d);
 }
 
 export function nightsBetween(checkIn: string, checkOut: string): number {
-  const start = new Date(checkIn).getTime();
-  const end   = new Date(checkOut).getTime();
+  const start = parseDateInput(checkIn).getTime();
+  const end   = parseDateInput(checkOut).getTime();
   return Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
 }
 
@@ -52,6 +65,7 @@ export function formatCurrency(
   return new Intl.NumberFormat('en-NG', {
     style:    'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: 0,
   }).format(amount);
 }
@@ -83,7 +97,7 @@ export function bookingStatusColor(status: BookingStatus): string {
 export function paymentStatusColor(status: PaymentStatus): string {
   const colors: Record<PaymentStatus, string> = {
     PENDING:  'bg-amber-100 text-amber-800',
-    SUCCESS:  'bg-green-100 text-green-800',
+    SUCCESSFUL: 'bg-green-100 text-green-800',
     FAILED:   'bg-red-100 text-red-800',
     REFUNDED: 'bg-purple-100 text-purple-800',
   };
@@ -92,11 +106,10 @@ export function paymentStatusColor(status: PaymentStatus): string {
 
 export function roomTypeLabel(type: RoomType): string {
   const labels: Record<RoomType, string> = {
-    STANDARD:  'Standard Room',
-    DELUXE:    'Deluxe Room',
-    SUITE:     'Suite',
-    PENTHOUSE: 'Penthouse',
-    VILLA:     'Private Villa',
+    SINGLE: 'Single Room',
+    DOUBLE: 'Double Room',
+    DELUXE: 'Deluxe Room',
+    SUITE: 'Suite',
   };
   return labels[type] ?? type;
 }
@@ -109,6 +122,28 @@ export function truncate(str: string, maxLen = 120): string {
 
 export function initials(firstName: string, lastName: string): string {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
+
+/** Human-friendly relative time, e.g. "16 mins ago". */
+export function timeAgo(dateStr: string | undefined | null): string {
+  if (!dateStr) return '';
+  const then = new Date(dateStr).getTime();
+  if (Number.isNaN(then)) return '';
+  const mins = Math.round((Date.now() - then) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min${mins === 1 ? '' : 's'} ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  const months = Math.round(days / 30);
+  if (months < 12) return `${months} mo ago`;
+  return `${Math.round(months / 12)} yr ago`;
+}
+
+/** Display reference for a booking id, e.g. 108 → "LG-B00108". */
+export function bookingRef(id: number): string {
+  return `LG-B${String(id).padStart(5, '0')}`;
 }
 
 // ─── Error Helpers ────────────────────────────────────────────────────────────
